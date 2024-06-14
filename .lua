@@ -3,7 +3,7 @@ if game.PlaceId == 5922311258 then
         6146262434,  -- Replace with actual user ID
         987654321,  -- Replace with actual user ID
         111111111,  -- Replace with actual user ID
-        1886028580,  -- Replace with actual user ID
+        111111111,  -- Replace with actual user ID
         333333333,  -- Replace with actual user ID
         444444444,  -- Replace with actual user ID
         555555555,  -- Replace with actual user ID
