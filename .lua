@@ -231,6 +231,20 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        Hittab:AddTextbox({
+            Name = "Range Extender Distance",
+            Default = tostring(_G.ReachExtenderDistance),
+            TextDisappear = true,
+            Callback = function(Value)
+                local distance = tonumber(Value)
+                if distance then
+                    _G.ReachExtenderDistance = distance
+                else
+                    print("Invalid range extender distance input:", Value)
+                end
+            end
+        })
+        
         -- Add Hit Cooldown textbox
         Hittab:AddTextbox({
             Name = "Hit Cooldown",
