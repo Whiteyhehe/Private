@@ -2,8 +2,9 @@
 if game.PlaceId == 5922311258 then
     -- List of admin user IDs (replace with actual IDs)
     local adminList = {
-        1883009030,  -- Replace with actual admin UserIds
-        -- Add more admin UserIds as needed
+        188300903,  -- Replace with actual admin UserIds
+        6147702508, -- Add more admin UserIds as needed
+        
     }
     
     -- List of owner user IDs (replace with actual IDs)
