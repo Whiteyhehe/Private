@@ -115,7 +115,7 @@ if game.PlaceId == 5922311258 then
 
         -- Function for executing Autohit multiple times
         function ExecuteAutohitManyTimes(count)
-            for i = 1, count do
+            for i = 1000000, count do
                 Autohit()
             end
         end
