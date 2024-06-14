@@ -37,10 +37,10 @@ if game.PlaceId == 5922311258 then
         
         -- Create a customizable GUI window
         local Window = OrionLib:MakeWindow({
-            Name = "fight park private script made by (whitey_plays)",
+            Name = "My Game Scripts",
             HidePremium = false,
             IntroEnabled = false,
-            IntroText = "fight park",
+            IntroText = "Welcome to my game!",
             SaveConfig = true,
             ConfigFolder = "OrionTest",
             Drag = true  -- Enabling draggable window
@@ -250,15 +250,14 @@ if game.PlaceId == 5922311258 then
             Name = "Hit Cooldown",
             Default = tostring(_G.HitCooldown),
             TextDisappear = true,
-            Callback = function
-                    function(Value)
-                    local cooldown = tonumber(Value)
-                    if cooldown then
-                        _G.HitCooldown = cooldown
-                    else
-                        print("Invalid hit cooldown input:", Value)
-                    end
-                end	  
+            Callback = function(Value)
+                local cooldown = tonumber(Value)
+                if cooldown then
+                    _G.HitCooldown = cooldown
+                else
+                    print("Invalid hit cooldown input:", Value)
+                end
+            end	  
         })
 
         -- Create AutoHatch tab
@@ -270,6 +269,8 @@ if game.PlaceId == 5922311258 then
 
         -- Add Autohatch toggle
         Hatchtab:AddToggle({
+            Name = "Autohatch
+                        Hatchtab:AddToggle({
             Name = "Autohatch",
             Default = false,
             Callback = function(Value)
@@ -429,4 +430,4 @@ if game.PlaceId == 5922311258 then
 
 else
     print("This script is intended for a different game.")
-    end
+        end
