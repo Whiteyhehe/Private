@@ -2,14 +2,15 @@
 if game.PlaceId == 5922311258 then
     -- List of admin user IDs (replace with actual IDs)
     local adminList = {
-        1234567890,  -- Replace with actual admin UserIds
-        -- Add more admin UserIds as needed
+        { UserId = nil },  -- Placeholder for admin with UserId
+        { UserId = nil },  -- Placeholder for admin with UserId
+        -- Add more user IDs as needed
     }
     
     -- List of owner user IDs (replace with actual IDs)
     local ownerList = {
-        1886028580,   -- Replace with actual owner UserIds
-        -- Add more owner UserIds as needed
+        1886028580,   -- Replace with actual user ID
+        -- Add more owner IDs as needed
     }
     
     local player = game.Players.LocalPlayer
@@ -37,10 +38,10 @@ if game.PlaceId == 5922311258 then
         
         -- Create a customizable GUI window
         local Window = OrionLib:MakeWindow({
-            Name = "My Game Scripts",
+            Name = "fight park private script made by (whitey_plays)",
             HidePremium = false,
             IntroEnabled = false,
-            IntroText = "Welcome to my game!",
+            IntroText = "fight park",
             SaveConfig = true,
             ConfigFolder = "OrionTest",
             Drag = true  -- Enabling draggable window
@@ -80,8 +81,8 @@ if game.PlaceId == 5922311258 then
         end
 
         -- Function for Autohit functionality
-        function Autohit(numTimes)
-            for _ = 1, numTimes do
+        function Autohit()
+            while _G.Autohit do
                 local players = game:GetService("Players"):GetPlayers()
                 local playerCharacter = game.Players.LocalPlayer.Character
                 local range = _G.AutohitRange  -- Use range variable from _G
@@ -110,7 +111,7 @@ if game.PlaceId == 5922311258 then
         -- Function for InfiniteJump functionality
         function InfiniteJump()
             local InfiniteJumpEnabled = true
-            game:GetService("UserInputService").JumpRequest:Connect(function()
+            game:GetService("UserInputService").JumpRequest:connect(function()
                 if InfiniteJumpEnabled then
                     game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
                 end
@@ -206,21 +207,7 @@ if game.PlaceId == 5922311258 then
             Callback = function(Value)
                 _G.Autohit = Value
                 if _G.Autohit then
-                    spawn(function()
-                        Autohit(1) -- Start with 1 iteration
-                    end)
-                end
-            end
-        })
-
-        -- Add Autohit button for a million times
-        Hittab:AddButton({
-            Name = "Autohit 1,000,000 times",
-            Callback = function()
-                if _G.Autohit then
-                    for _ = 1, 1000000 do
-                        Autohit(1) -- Execute Autohit once per iteration
-                    end
+                    spawn(Autohit)
                 end
             end
         })
@@ -269,8 +256,6 @@ if game.PlaceId == 5922311258 then
 
         -- Add Autohatch toggle
         Hatchtab:AddToggle({
-            Name = "Autohatch
-                        Hatchtab:AddToggle({
             Name = "Autohatch",
             Default = false,
             Callback = function(Value)
@@ -282,7 +267,8 @@ if game.PlaceId == 5922311258 then
         })
 
         -- Add Select Crates dropdown
-        Hatchtab:AddDropdown({
+        Hatchtab:AddDropdown
+({
             Name = "Select Crates",
             Default = "Swords",
             Options = {"Swords", "Shields"},
@@ -407,27 +393,13 @@ if game.PlaceId == 5922311258 then
                     end
                 end
             })
-
-            -- Add Button to execute Autohit a million times
-            OwnerControlstab:AddButton({
-                Name = "Autohit 1,000,000 times",
-                Callback = function()
-                    if _G.Autohit then
-                        for _ = 1, 1000000 do
-                            Autohit(1) -- Execute Autohit once per iteration
-                        end
-                    end
-                end
-            })
         end
 
         -- Initialize the GUI window
         OrionLib:Init()
-
     else
         print("You are not an admin or owner.")
     end
-
 else
     print("This script is intended for a different game.")
-        end
+end
