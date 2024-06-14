@@ -2,22 +2,21 @@
 if game.PlaceId == 5922311258 then
     -- List of admin user IDs (replace with actual IDs)
     local adminList = {
-        6146262434,  -- Replace with actual user ID
-        987654221,   -- Replace with actual user ID
-        111111111,   -- Replace with actual user ID
-        222222222,   -- Replace with actual user ID
-        333333333,   -- Replace with actual user ID
-        444444444,   -- Replace with actual user ID
-        555555555,   -- Replace with actual user ID
-        666666666,   -- Replace with actual user ID
-        777777777,   -- Replace with actual user ID
-        888888888    -- Replace with actual user ID
+        1234567890,  -- Replace with actual admin UserIds
+        -- Add more admin UserIds as needed
     }
-
+    
+    -- List of owner user IDs (replace with actual IDs)
+    local ownerList = {
+        1886028580,   -- Replace with actual owner UserIds
+        -- Add more owner UserIds as needed
+    }
+    
     local player = game.Players.LocalPlayer
     local isAdmin = false
+    local isOwner = false
 
-    -- Check if player is in admin list
+    -- Check if player is in admin or owner list
     for _, userId in ipairs(adminList) do
         if player.UserId == userId then
             isAdmin = true
@@ -25,16 +24,23 @@ if game.PlaceId == 5922311258 then
         end
     end
 
-    if isAdmin then
+    for _, userId in ipairs(ownerList) do
+        if player.UserId == userId then
+            isOwner = true
+            break
+        end
+    end
+
+    if isAdmin or isOwner then
         -- Load external library for GUI (replace URL with actual library source)
         local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
         
         -- Create a customizable GUI window
         local Window = OrionLib:MakeWindow({
-            Name = "fight park private script made by (whitey_plays)",
+            Name = "My Game Scripts",
             HidePremium = false,
             IntroEnabled = false,
-            IntroText = "fight park",
+            IntroText = "Welcome to my game!",
             SaveConfig = true,
             ConfigFolder = "OrionTest",
             Drag = true  -- Enabling draggable window
@@ -49,13 +55,16 @@ if game.PlaceId == 5922311258 then
         _G.AutohitRange = 50  -- Default range for Autohit
         _G.ReachExtenderEnabled = false
         _G.ReachExtenderDistance = 100  -- Default reach extender distance
+        _G.BlockCooldown = 0.2  -- Default block cooldown in seconds
+        _G.HitCooldown = 0.5  -- Default hit cooldown in seconds
+        _G.WalkSpeed = 16  -- Default walk speed in Roblox
 
         -- Function for Autoblock functionality
         function Autoblock()
             while _G.Autoblock do
                 local args = { [1] = true }
                 game:GetService("ReplicatedStorage").Remotes.Character.Block:FireServer(unpack(args))
-                wait(0.2)
+                wait(_G.BlockCooldown)  -- Use block cooldown from _G
                 args = { [1] = false }
                 game:GetService("ReplicatedStorage").Remotes.Character.Block:FireServer(unpack(args))
                 wait(0.001)
@@ -71,8 +80,8 @@ if game.PlaceId == 5922311258 then
         end
 
         -- Function for Autohit functionality
-        function Autohit()
-            while _G.Autohit do
+        function Autohit(numTimes)
+            for _ = 1, numTimes do
                 local players = game:GetService("Players"):GetPlayers()
                 local playerCharacter = game.Players.LocalPlayer.Character
                 local range = _G.AutohitRange  -- Use range variable from _G
@@ -89,6 +98,7 @@ if game.PlaceId == 5922311258 then
 
                                 local args_hit = { [1] = targetPlayer }
                                 game:GetService("ReplicatedStorage").Remotes.Character.Hit:FireServer(unpack(args_hit))
+                                wait(_G.HitCooldown)  -- Use hit cooldown from _G
                             end
                         end
                     end
@@ -100,7 +110,7 @@ if game.PlaceId == 5922311258 then
         -- Function for InfiniteJump functionality
         function InfiniteJump()
             local InfiniteJumpEnabled = true
-            game:GetService("UserInputService").JumpRequest:connect(function()
+            game:GetService("UserInputService").JumpRequest:Connect(function()
                 if InfiniteJumpEnabled then
                     game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
                 end
@@ -116,13 +126,46 @@ if game.PlaceId == 5922311258 then
             end
         end
 
-        -- Create tabs and controls in the GUI window
+        -- Function to find an admin player by their UserId
+        local function findAdminPlayer(userId)
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.UserId == userId then
+                    return player
+                end
+            end
+            return nil
+        end
+
+        -- Function to teleport an admin to the player
+        function TeleportAdmin(adminPlayer)
+            local adminCharacter = adminPlayer.Character
+            local playerCharacter = player.Character
+            if adminCharacter and playerCharacter then
+                adminCharacter:SetPrimaryPartCFrame(playerCharacter.PrimaryPart.CFrame)
+            end
+        end
+
+        -- Function to kill an admin
+        function KillAdmin(adminPlayer)
+            local adminHumanoid = adminPlayer.Character and adminPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if adminHumanoid then
+                adminHumanoid.Health = 0
+            end
+        end
+
+        -- Function to kick an admin
+        function KickAdmin(adminPlayer)
+            game:GetService("Players"):Kick(adminPlayer)
+        end
+
+        -- Create Autoblock tab
         local Blocktab = Window:MakeTab({
-            Name = "Auto Block (fight park)",
+            Name = "Autoblock",
             Icon = "rbxassetid://4483345998",
             PremiumOnly = false
         })
 
+        -- Add Autoblock toggle
         Blocktab:AddToggle({
             Name = "Autoblock",
             Default = false,
@@ -134,23 +177,55 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        -- Add Block Cooldown textbox
+        Blocktab:AddTextbox({
+            Name = "Block Cooldown",
+            Default = tostring(_G.BlockCooldown),
+            TextDisappear = true,
+            Callback = function(Value)
+                local cooldown = tonumber(Value)
+                if cooldown then
+                    _G.BlockCooldown = cooldown
+                else
+                    print("Invalid block cooldown input:", Value)
+                end
+            end	  
+        })
+
+        -- Create Autohit tab
         local Hittab = Window:MakeTab({
-            Name = "Auto Hit (fight park)",
+            Name = "Autohit",
             Icon = "rbxassetid://4483345998",
             PremiumOnly = false
         })
 
+        -- Add Autohit toggle
         Hittab:AddToggle({
             Name = "Autohit",
             Default = false,
             Callback = function(Value)
                 _G.Autohit = Value
                 if _G.Autohit then
-                    spawn(Autohit)
+                    spawn(function()
+                        Autohit(1) -- Start with 1 iteration
+                    end)
                 end
             end
         })
 
+        -- Add Autohit button for a million times
+        Hittab:AddButton({
+            Name = "Autohit 1,000,000 times",
+            Callback = function()
+                if _G.Autohit then
+                    for _ = 1, 1000000 do
+                        Autohit(1) -- Execute Autohit once per iteration
+                    end
+                end
+            end
+        })
+
+        -- Add Reach Extender toggle
         Hittab:AddToggle({
             Name = "Reach Extender",
             Default = false,
@@ -159,6 +234,7 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        -- Add Reach Extender Distance slider
         Hittab:AddSlider({
             Name = "Reach Extender Distance",
             Min = 10,
@@ -169,38 +245,31 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        -- Add Hit Cooldown textbox
         Hittab:AddTextbox({
-            Name = "Textbox",
-            Default = "default box input",
+            Name = "Hit Cooldown",
+            Default = tostring(_G.HitCooldown),
             TextDisappear = true,
             Callback = function(Value)
-                print(Value)
-                -- Additional logic related to the textbox input can be added here
+                local cooldown = tonumber(Value)
+                if cooldown then
+                    _G.HitCooldown = cooldown
+                else
+                    print("Invalid hit cooldown input:", Value)
+                end
             end	  
         })
 
-        -- Function for toggling Reach Extender
-        local function ToggleReachExtender()
-            _G.ReachExtenderEnabled = not _G.ReachExtenderEnabled
-            -- Additional logic can be added here if needed
-        end
-
-        -- Add text button for Toggle Reach Extender
-        Hittab:AddButton({
-            Name = "Toggle Reach Extender",
-            Callback = function()
-                ToggleReachExtender()
-            end
-        })
-
+        -- Create AutoHatch tab
         local Hatchtab = Window:MakeTab({
-            Name = "Hatch (fight park)",
+            Name = "AutoHatch",
             Icon = "rbxassetid://4483345998",
             PremiumOnly = false
         })
 
+        -- Add Autohatch toggle
         Hatchtab:AddToggle({
-            Name = "AutoHatch",
+            Name = "Autohatch",
             Default = false,
             Callback = function(Value)
                 _G.AutoHatch = Value
@@ -210,6 +279,7 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        -- Add Select Crates dropdown
         Hatchtab:AddDropdown({
             Name = "Select Crates",
             Default = "Swords",
@@ -219,12 +289,30 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        -- Create Misc tab
         local Misctab = Window:MakeTab({
-            Name = "Misc (fight park)",
+            Name = "Misc",
             Icon = "rbxassetid://4483345998",
             PremiumOnly = false
         })
 
+        -- Add Walkspeed textbox
+        Misctab:AddTextbox({
+            Name = "Walkspeed",
+            Default = tostring(_G.WalkSpeed),
+            TextDisappear = true,
+            Callback = function(Value)
+                local walkspeed = tonumber(Value)
+                if walkspeed then
+                    _G.WalkSpeed = walkspeed
+                    ChangeWalkspeed(walkspeed)
+                else
+                    print("Invalid walkspeed input:", Value)
+                end
+            end
+        })
+
+        -- Add Walkspeed Slider
         Misctab:AddSlider({
             Name = "Walkspeed Slider",
             Min = 1,
@@ -238,6 +326,7 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        -- Add Infinite Jump toggle
         Misctab:AddToggle({
             Name = "Infinite Jump",
             Default = false,
@@ -249,11 +338,95 @@ if game.PlaceId == 5922311258 then
             end
         })
 
+        -- Create Owner Controls tab (visible only to owners)
+        if isOwner then
+            local OwnerControlstab = Window:MakeTab({
+                Name = "Owner Controls",
+                Icon = "rbxassetid://4483345998",
+                PremiumOnly = false
+            })
+
+            -- Add Teleport Admin functionality
+            OwnerControlstab:AddTextbox({
+                Name = "Teleport Admin (UserID)",
+                Default = "",
+                TextDisappear = false,
+                Callback = function(Value)
+                    local userId = tonumber(Value)
+                    if userId then
+                        local adminPlayer = findAdminPlayer(userId)
+                        if adminPlayer then
+                            TeleportAdmin(adminPlayer)
+                        else
+                            print("Admin with UserID", userId, "not found.")
+                        end
+                    else
+                        print("Invalid UserID input:", Value)
+                    end
+                end
+            })
+
+            -- Add Kill Admin functionality
+            OwnerControlstab:AddTextbox({
+                Name = "Kill Admin (UserID)",
+                Default = "",
+                TextDisappear = false,
+                Callback = function(Value)
+                    local userId = tonumber(Value)
+                    if userId then
+                        local adminPlayer = findAdminPlayer(userId)
+                        if adminPlayer then
+                            KillAdmin(adminPlayer)
+                        else
+                            print("Admin with UserID", userId, "not found.")
+                        end
+                    else
+                        print("Invalid UserID input:", Value)
+                    end
+                end
+            })
+
+            -- Add Kick Admin functionality
+            OwnerControlstab:AddTextbox({
+                Name = "Kick Admin (UserID)",
+                Default = "",
+                TextDisappear = false,
+                Callback = function(Value)
+                    local userId = tonumber(Value)
+                    if userId then
+                        local adminPlayer = findAdminPlayer(userId)
+                        if adminPlayer then
+                            KickAdmin(adminPlayer)
+                        else
+                            print("Admin with UserID", userId, "not found.")
+                        end
+                    else
+                        print("Invalid UserID input:", Value)
+                    end
+                end
+            })
+
+            -- Add Button to execute Autohit a million times
+            OwnerControlstab:AddButton({
+                Name = "Autohit 1,000,000 times",
+                Callback = function()
+                    if _G.Autohit then
+                        for _ = 1, 1000000 do
+                            Autohit(1) -- Execute Autohit once per iteration
+                        end
+                    end
+                end
+            })
+        end
+
         -- Initialize the GUI window
         OrionLib:Init()
+
     else
-        print("You are not an admin.")
+        print("You are not an admin or owner.")
     end
+
 else
     print("This script is intended for a different game.")
-end
+        end
+        
