@@ -38,10 +38,10 @@ if game.PlaceId == 5922311258 then
         
         -- Create a customizable GUI window
         local Window = OrionLib:MakeWindow({
-            Name = "My Game Scripts",
+            Name = "Whiteware public",
             HidePremium = false,
             IntroEnabled = false,
-            IntroText = "Welcome to my game!",
+            IntroText = "Welcome to my script!",
             SaveConfig = true,
             ConfigFolder = "OrionTest",
             Drag = true  -- Enabling draggable window
@@ -199,37 +199,23 @@ if game.PlaceId == 5922311258 then
             PremiumOnly = false
         })
 
-        -- Add Autohit button for single hit
-        Hittab:AddButton({
-            Name = "Autohit Once",
-            Callback = function()
-                local players = game:GetService("Players"):GetPlayers()
-                local localPlayer = game.Players.LocalPlayer
-                local range = _G.AutohitRange  -- Use range variable from _G
-                local closestPlayer = nil
-                local closestDistance = math.huge
+        -- Add Autohit toggle
+        Hittab:AddToggle({
+            Name = "Autohit",
+            Default = false,
+            Callback = function(Value)
+                _G.Autohit = Value
+            end
+        })
 
-                -- Find the closest player
-                for _, targetPlayer in ipairs(players) do
-                    if targetPlayer ~= localPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                        local distance = (localPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude
-                        if distance < closestDistance then
-                            closestDistance = distance
-                            closestPlayer = targetPlayer
-                        end
-                    end
-                end
-
-                -- Perform Autohit on the closest player without cooldown
-                if closestPlayer and closestDistance <= range then
-                    local args_swing = { [1] = 1 }
-                    game:GetService("ReplicatedStorage").Remotes.Character.Swing:FireServer(unpack(args_swing))
-
-                    local args_hit = { [1] = closestPlayer }
-                    game:GetService("ReplicatedStorage").Remotes.Character.Hit:FireServer(unpack(args_hit))
-                else
-                    print("No valid player found within range.")
-                end
+        -- Add Autohit Range slider
+        Hittab:AddSlider({
+            Name = "Autohit Range",
+            Min = 10,
+            Max = 500,
+            Default = 50,
+            Callback = function(Value)
+                _G.AutohitRange = Value
             end
         })
 
