@@ -122,35 +122,36 @@ if game.PlaceId == 5922311258 then
 
         -- Function for Autohit functionality
         function Autohit()
-            while true do
+            while wait() do
                 if _G.Autohit then
-                    local players = game:GetService("Players"):GetPlayers()
-                    local localPlayer = game.Players.LocalPlayer
-                    local range = _G.AutohitRange  -- Use range variable from _G
-                    local closestPlayer = nil
-                    local closestDistance = math.huge
+                    for i = 1, 2 do
+                        local players = game:GetService("Players"):GetPlayers()
+                        local localPlayer = game.Players.LocalPlayer
+                        local range = _G.AutohitRange  -- Use range variable from _G
+                        local closestPlayer = nil
+                        local closestDistance = math.huge
 
-                    -- Find the closest player
-                    for _, targetPlayer in ipairs(players) do
-                        if targetPlayer ~= localPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-                            local distance = (localPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude
-                            if distance < closestDistance then
-                                closestDistance = distance
-                                closestPlayer = targetPlayer
+                        -- Find the closest player
+                        for _, targetPlayer in ipairs(players) do
+                            if targetPlayer ~= localPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                                local distance = (localPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude
+                                if distance < closestDistance then
+                                    closestDistance = distance
+                                    closestPlayer = targetPlayer
+                                end
                             end
                         end
-                    end
 
-                    -- Perform Autohit on the closest player without cooldown
-                    if closestPlayer and closestDistance <= range then
-                        local args_swing = { [1] = 1 }
-                        game:GetService("ReplicatedStorage").Remotes.Character.Swing:FireServer(unpack(args_swing))
+                        -- Perform Autohit on the closest player without cooldown
+                        if closestPlayer and closestDistance <= range then
+                            local args_swing = { [1] = 1 }
+                            game:GetService("ReplicatedStorage").Remotes.Character.Swing:FireServer(unpack(args_swing))
 
-                        local args_hit = { [1] = closestPlayer }
-                        game:GetService("ReplicatedStorage").Remotes.Character.Hit:FireServer(unpack(args_hit))
+                            local args_hit = { [1] = closestPlayer }
+                            game:GetService("ReplicatedStorage").Remotes.Character.Hit:FireServer(unpack(args_hit))
+                        end
                     end
                 end
-                wait() -- Wait before looping again
             end
         end
 
@@ -259,9 +260,9 @@ if game.PlaceId == 5922311258 then
             PremiumOnly = false
         })
 
-        -- Add Autohatch toggle
+        -- Add AutoHatch toggle
         Hatchtab:AddToggle({
-            Name = "Autohatch",
+            Name = "AutoHatch",
             Default = false,
             Callback = function(Value)
                 _G.AutoHatch = Value
@@ -397,27 +398,43 @@ if game.PlaceId == 5922311258 then
                     end
                 end
             })
-
-            -- Add Button to execute Autohit a million times
-            OwnerControlstab:AddButton({
-                Name = "Autohit 1,000,000 times",
-                Callback = function()
-                    if _G.Autohit then
-                        for _ = 1, 1000000 do
-                            Autohit() -- Execute Autohit once per iteration
-                        end
-                    end
-                end
-            })
         end
 
-        -- Initialize the GUI window
+        -- Function to enable infinite jump
+        function InfiniteJump()
+            game:GetService("UserInputService").JumpRequest:Connect(function()
+                if _G.InfiniteJump then
+                    game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+                end
+            end)
+        end
+
+        -- Initialize infinite jump if toggled on by default
+        if _G.InfiniteJump then
+            spawn(InfiniteJump)
+        end
+
+        -- Notification for script loaded
+        OrionLib:MakeNotification({
+            Name = "Script Loaded",
+            Content = "All functionalities are ready to use!",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
+
+        -- Initialize walkspeed on script load
+        ChangeWalkspeed(_G.WalkSpeed)
+
+        -- Initialize GUI
         OrionLib:Init()
-
     else
-        print("You are not an admin or owner.")
+        -- Notification for access denied
+        local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/shlexware/Orion/main/source'))()
+        OrionLib:MakeNotification({
+            Name = "Access Denied",
+            Content = "You do not have permission to use this script.",
+            Image = "rbxassetid://4483345998",
+            Time = 5
+        })
     end
-
-else
-    print("This script is intended for a different game.")
 end
