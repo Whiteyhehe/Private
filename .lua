@@ -8,7 +8,8 @@ if game.PlaceId == 5922311258 then
     
     -- List of owner user IDs (replace with actual IDs)
     local ownerList = {
-        1886028580,   -- Replace with actual owner UserIds
+        1886028580,
+        6192978838,-- Replace with actual owner UserIds
         -- Add more owner UserIds as needed
     }
     
@@ -56,7 +57,6 @@ if game.PlaceId == 5922311258 then
         _G.ReachExtenderEnabled = false
         _G.ReachExtenderDistance = 100  -- Default reach extender distance
         _G.BlockCooldown = 0.2  -- Default block cooldown in seconds
-        _G.HitCooldown = 0.5  -- Default hit cooldown in seconds
         _G.WalkSpeed = 16  -- Default walk speed in Roblox
 
         -- Function for Autoblock functionality
@@ -77,44 +77,6 @@ if game.PlaceId == 5922311258 then
                 game:GetService("ReplicatedStorage").Remotes.Profile.Purchase:FireServer(_G.SelectCrates, 1)
                 wait(0.1) -- Adding a small wait to prevent excessive looping
             end
-        end
-
-        -- Function for Autohit functionality
-        function Autohit(numTimes)
-            for _ = 1, numTimes do
-                local players = game:GetService("Players"):GetPlayers()
-                local playerCharacter = game.Players.LocalPlayer.Character
-                local range = _G.AutohitRange  -- Use range variable from _G
-
-                for _, targetPlayer in ipairs(players) do
-                    if targetPlayer ~= player then
-                        local targetCharacter = targetPlayer.Character
-                        if targetCharacter and targetCharacter:FindFirstChild("HumanoidRootPart") then
-                            local distance = (playerCharacter.HumanoidRootPart.Position - targetCharacter.HumanoidRootPart.Position).Magnitude
-                            local reachDistance = _G.ReachExtenderEnabled and _G.ReachExtenderDistance or range
-                            if distance <= reachDistance then
-                                local args_swing = { [1] = 1 }
-                                game:GetService("ReplicatedStorage").Remotes.Character.Swing:FireServer(unpack(args_swing))
-
-                                local args_hit = { [1] = targetPlayer }
-                                game:GetService("ReplicatedStorage").Remotes.Character.Hit:FireServer(unpack(args_hit))
-                                wait(_G.HitCooldown)  -- Use hit cooldown from _G
-                            end
-                        end
-                    end
-                end
-                wait() -- Yield to avoid excessive looping
-            end
-        end
-
-        -- Function for InfiniteJump functionality
-        function InfiniteJump()
-            local InfiniteJumpEnabled = true
-            game:GetService("UserInputService").JumpRequest:Connect(function()
-                if InfiniteJumpEnabled then
-                    game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass('Humanoid'):ChangeState("Jumping")
-                end
-            end)
         end
 
         -- Function for changing walkspeed
@@ -158,6 +120,43 @@ if game.PlaceId == 5922311258 then
             game:GetService("Players"):Kick(adminPlayer)
         end
 
+        -- Function for Autohit functionality
+        function Autohit()
+            while true do
+                if _G.Autohit then
+                    local players = game:GetService("Players"):GetPlayers()
+                    local localPlayer = game.Players.LocalPlayer
+                    local range = _G.AutohitRange  -- Use range variable from _G
+                    local closestPlayer = nil
+                    local closestDistance = math.huge
+
+                    -- Find the closest player
+                    for _, targetPlayer in ipairs(players) do
+                        if targetPlayer ~= localPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                            local distance = (localPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude
+                            if distance < closestDistance then
+                                closestDistance = distance
+                                closestPlayer = targetPlayer
+                            end
+                        end
+                    end
+
+                    -- Perform Autohit on the closest player without cooldown
+                    if closestPlayer and closestDistance <= range then
+                        local args_swing = { [1] = 1 }
+                        game:GetService("ReplicatedStorage").Remotes.Character.Swing:FireServer(unpack(args_swing))
+
+                        local args_hit = { [1] = closestPlayer }
+                        game:GetService("ReplicatedStorage").Remotes.Character.Hit:FireServer(unpack(args_hit))
+                    end
+                end
+                wait() -- Wait before looping again
+            end
+        end
+
+        -- Start the Autohit function
+        spawn(Autohit)
+
         -- Create Autoblock tab
         local Blocktab = Window:MakeTab({
             Name = "Autoblock",
@@ -199,28 +198,36 @@ if game.PlaceId == 5922311258 then
             PremiumOnly = false
         })
 
-        -- Add Autohit toggle
-        Hittab:AddToggle({
-            Name = "Autohit",
-            Default = false,
-            Callback = function(Value)
-                _G.Autohit = Value
-                if _G.Autohit then
-                    spawn(function()
-                        Autohit(1) -- Start with 1 iteration
-                    end)
-                end
-            end
-        })
-
-        -- Add Autohit button for a million times
+        -- Add Autohit button for single hit
         Hittab:AddButton({
-            Name = "Autohit 1,000,000 times",
+            Name = "Autohit Once",
             Callback = function()
-                if _G.Autohit then
-                    for _ = 1, 1000000 do
-                        Autohit(1) -- Execute Autohit once per iteration
+                local players = game:GetService("Players"):GetPlayers()
+                local localPlayer = game.Players.LocalPlayer
+                local range = _G.AutohitRange  -- Use range variable from _G
+                local closestPlayer = nil
+                local closestDistance = math.huge
+
+                -- Find the closest player
+                for _, targetPlayer in ipairs(players) do
+                    if targetPlayer ~= localPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+                        local distance = (localPlayer.Character.HumanoidRootPart.Position - targetPlayer.Character.HumanoidRootPart.Position).Magnitude
+                        if distance < closestDistance then
+                            closestDistance = distance
+                            closestPlayer = targetPlayer
+                        end
                     end
+                end
+
+                -- Perform Autohit on the closest player without cooldown
+                if closestPlayer and closestDistance <= range then
+                    local args_swing = { [1] = 1 }
+                    game:GetService("ReplicatedStorage").Remotes.Character.Swing:FireServer(unpack(args_swing))
+
+                    local args_hit = { [1] = closestPlayer }
+                    game:GetService("ReplicatedStorage").Remotes.Character.Hit:FireServer(unpack(args_hit))
+                else
+                    print("No valid player found within range.")
                 end
             end
         })
@@ -243,21 +250,6 @@ if game.PlaceId == 5922311258 then
             Callback = function(Value)
                 _G.ReachExtenderDistance = Value
             end
-        })
-
-        -- Add Hit Cooldown textbox
-        Hittab:AddTextbox({
-            Name = "Hit Cooldown",
-            Default = tostring(_G.HitCooldown),
-            TextDisappear = true,
-            Callback = function(Value)
-                local cooldown = tonumber(Value)
-                if cooldown then
-                    _G.HitCooldown = cooldown
-                else
-                    print("Invalid hit cooldown input:", Value)
-                end
-            end	  
         })
 
         -- Create AutoHatch tab
@@ -412,7 +404,7 @@ if game.PlaceId == 5922311258 then
                 Callback = function()
                     if _G.Autohit then
                         for _ = 1, 1000000 do
-                            Autohit(1) -- Execute Autohit once per iteration
+                            Autohit() -- Execute Autohit once per iteration
                         end
                     end
                 end
@@ -428,5 +420,4 @@ if game.PlaceId == 5922311258 then
 
 else
     print("This script is intended for a different game.")
-        end
-        
+end
